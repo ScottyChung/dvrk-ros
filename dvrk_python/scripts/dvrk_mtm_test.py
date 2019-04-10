@@ -57,7 +57,7 @@ class example_application:
     # wait for foot pedal
     def wait_for_coag(self):
         self.coag_event.clear()
-        self.coag_event.wait(60)
+        self.coag_event.wait(10)
 
 
     # tests
