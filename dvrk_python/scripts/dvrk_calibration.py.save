@@ -46,62 +46,66 @@ class example_application:
             self.arm.move(PyKDL.Vector(x,y,z), blocking=False)
             rospy.sleep(sleep_time)
 
-    def speed_test(self):
-        z_home = -0.1235
-        for x in np.linspace(0,0.05):
-            x_translation = PyKDL.Vector(x,0,z_home)
-            self.arm.move(x_translation, blocking=False)
-            time.sleep(0.1)
-        rospy.sleep(0.5)
-        self.vmove(PyKDL.Vector(0,0,z_home),0.05)
-        rospy.sleep(0.5)
-        for x in np.linspace(0,0.05):
-            x_translation = PyKDL.Vector(x,0,z_home)
-            self.arm.move(x_translation, blocking=False)
-            time.sleep(0.05)
-        rospy.sleep(0.5)
-        self.vmove(PyKDL.Vector(0,0,z_home),0.05)
-        rospy.sleep(0.5)
-        for x in np.linspace(0,0.05):
-            x_translation = PyKDL.Vector(x,0,z_home)
-            self.arm.move(x_translation, blocking=False)
-            time.sleep(0.02)
-        rospy.sleep(0.5)
-        self.vmove(PyKDL.Vector(0,0,z_home),0.05)
-        rospy.sleep(0.5)
-
-    def xyz_move(self):
-        distance = 0.05
-        speed=0.04
-        self.vmove(PyKDL.Vector(distance,0,-0.1235),speed)
-        self.vmove(PyKDL.Vector(0,0,-0.1235),speed)
-        self.vmove(PyKDL.Vector(0,distance,-0.1235),speed)
-        self.vmove(PyKDL.Vector(0,0,-0.1235),speed)
-        self.vmove(PyKDL.Vector(0,0,-0.1235+distance),speed)
-        self.vmove(PyKDL.Vector(0,0,-0.1235),speed)
+    def my_function(self):
+        """
+        Example:
+        self.arm.move(PyKDL.Vector(x,y,z))
+        where x,y,z are the cartesian coordinates of the desired points to move to
+        """
+	#Start at Home
+	self.home() 
+	'''#move in x direction 
+	self.arm.move(PyKDL.Vector(.12,0,0))
+	self.home()
+	self.arm.move(PyKDL.Vector(-.12,0,0))
+	self.home()
+	#move in y direction 
+	self.arm.move(PyKDL.Vector(0,.12,0))
+	self.home()
+	self.arm.move(PyKDL.Vector(0,-.12,0))
+	self.home()
+	#move in z direction
+	self.arm.move(PyKDL.Vector(0,0,.12))
+	self.home()
+	self.arm.move(PyKDL.Vector(0,0,-.2))
+	self.home()
+	#create square on new plane 
+        self.arm.move(PyKDL.Vector(0,0,-.2))
+	self.arm.move(PyKDL.Vector(.12,0,-.2))
+	self.arm.move(PyKDL.Vector(0,0,-.2))
+	self.arm.move(PyKDL.Vector(-.12,0,-.2))
+	self.arm.move(PyKDL.Vector(0,0,-.2))
+	self.arm.move(PyKDL.Vector(0,.12,-.2))
+	self.arm.move(PyKDL.Vector(0,0,-.2))
+	self.arm.move(PyKDL.Vector(0,-.12,-.2))
+	#touch same spots without going through middle
+	self.home()
+	self.arm.move(PyKDL.Vector(.12,0,0)) 
+	self.arm.move(PyKDL.Vector(.12,0,-.2))
+	self.arm.move(PyKDL.Vector(.12,0,0))
+	self.home() 
+	self.arm.move(PyKDL.Vector(-.12,0,0))
+	self.arm.move(PyKDL.Vector(-.12,0,-.2))
+	self.home()
+	self.arm.move(PyKDL.Vector(0,.12,0))
+	self.arm.move(PyKDL.Vector(0,.12,-.2))
+	self.arm.move(PyKDL.Vector(0,.12,0))
+	self.home()
+	self.arm.move(PyKDL.Vector(0,-.12,0))
+	self.arm.move(PyKDL.Vector(0,-.12,-.2))
+	self.arm.move(PyKDL.Vector(0,-.12,0))
+	self.home()
+	#dmove 
+	#self.arm.dmove(PyKDL.Vector(0,.12,0))
+	#self.arm.dmove(PyKDL.Vector(2,0,0))'''
+	#Each Joint Rotote/Slide 
+	self.joint.move([
+        print('hello')
 
     # main method
     def run(self):
         self.home()
-        raw_input('ready')
-        #Test Matrix 
-        r = 0.05
-        theta = np.repeat(np.linspace(0,np.pi/2,4),4)
-        phi = np.tile(np.linspace(0,np.pi/2,4),4)
-
-        x = r*np.sin(theta)*np.cos(phi)
-        y = r*np.sin(theta)*np.sin(phi)
-        z = r*np.cos(theta)
-        z_home = -0.1135
-        speed=0.05
-        #uncomment to motion
-        for a,b,c in zip(x[3:],y[3:],z[3:]):
-            self.vmove(PyKDL.Vector(a,b,c+z_home),speed)
-            print(a,b,c)
-            rospy.sleep(1)
-            self.vmove(PyKDL.Vector(0,0,z_home),speed)
-            time.sleep(1)
-        rospy.spin()
+        self.my_function()
 
 if __name__ == '__main__':
     try:

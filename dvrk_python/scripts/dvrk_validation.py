@@ -25,6 +25,7 @@ import math
 import sys
 import rospy
 import numpy
+import numpy as np
 import PyKDL
 
 
@@ -54,15 +55,16 @@ class example_application:
         # get current position
         initial_joint_position = numpy.copy(self.arm.get_current_joint_position())
         print(rospy.get_caller_id(), ' -> testing direct joint position for 2 joints of ', len(initial_joint_position))
-        amplitude = math.radians(10.0) # +/- 10 degrees
+        amplitude = math.radians(90.0) # +/- 10 degrees
         duration = 5  # seconds
         rate = 200 # aiming for 200 Hz
         samples = duration * rate
         # create a new goal starting with current position
         goal = numpy.copy(initial_joint_position)
-        for i in range(samples):
-            goal[0] = initial_joint_position[0] + amplitude *  math.sin(i * math.radians(360.0) / samples)
-            goal[1] = initial_joint_position[1] + amplitude *  math.sin(i * math.radians(360.0) / samples)
+        goal.fill(0)
+        goal[2] = 0.12
+        for i in range (samples):
+            goal[3] = amplitude * math.sin(i*math.pi*2/samples)
             self.arm.move_joint(goal, interpolate = False)
             rospy.sleep(1.0 / rate)
         print(rospy.get_caller_id(), ' <- joint direct complete')
@@ -176,11 +178,12 @@ class example_application:
 
     # main method
     def run(self):
+        self.z_home = -0.1135
+        print('Homing Arm now')
         self.home()
+        raw_input('Press any key to begin test')
         self.joint_direct()
-        self.joint_goal()
-        self.cartesian_direct()
-        self.cartesian_goal()
+        print('Completed Test. Closing')
 
 if __name__ == '__main__':
     try:

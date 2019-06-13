@@ -8,7 +8,6 @@ import numpy
 import PyKDL
 import numpy as np
 import time
-import wfu_helpers
 from geometry_msgs.msg import Twist, PoseStamped
 from sympy.utilities.iterables import multiset_permutations
 from nav_msgs.msg import Path
@@ -93,29 +92,19 @@ class example_application:
             time.sleep(speed)
         self.home()
 
-    def joint_motion_test(self):
-        goal = np.zeros(6)
-        self.arm.move_joint(goal)
-        rospy.sleep(2)
-        for i in np.linspace(0,math.pi):
-            goal[0] = i
-            self.arm.move_joint(goal) 
-            rospy.sleep(2)
-
-    def z_move_test(self):
-        z_home = -0.1135
-        raw_input('Will move in Z direction. Press any button to begin')
-        for x in np.linspace(0,0.1,21):
-            wfu_helpers.vmove(self.arm, PyKDL.Vector(0,x, z_home),0.05)
-            rospy.sleep(1)
-        print('Completed test')
-        
     # main method
     def run(self):
-        raw_input('Ready to Move to Home')
         self.home()
-        self.z_move_test()
-        rospy.spin()
+        raw_input('Ready to Move to Home')
+        z_home = -0.1135
+        for x in np.linspace(0,0.1,11):
+            self.arm.move(PyKDL.Vector(0, x, z_home))
+        #self.speed_test()
+        #self.xyz_move()
+        #p = PyKDL.Vector(0,0,0)
+        #sev = 0.7071
+        #m = PyKDL.Rotation(sev, -sev, 0, sev, sev, 0, 0, 0, 1)
+        #frame = PyKDL.Frame(m,p)
 
 if __name__ == '__main__':
     try:
