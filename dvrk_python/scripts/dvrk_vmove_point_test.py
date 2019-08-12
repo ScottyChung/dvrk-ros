@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env python
 
 import dvrk
@@ -9,6 +11,7 @@ import PyKDL
 import numpy as np
 import time
 import copy
+import wfu_helpers
 from geometry_msgs.msg import Twist, PoseStamped, Pose, Point, Quaternion
 from sympy.utilities.iterables import multiset_permutations
 from std_msgs.msg import Header
@@ -29,12 +32,14 @@ class example_application:
         self.publisher = rospy.Publisher('/visualization_marker_array', MarkerArray, queue_size=100)
         rospy.sleep(2)
 
+
+
     # homing example
     def home(self):
         print rospy.get_caller_id(), ' -> starting home'
         self.arm.home()
-        #self.__position_jaw_desired = 0.1
-        self.arm.close_jaw()
+        self.__position_jaw_desired = 0.1
+        # self.arm.close_jaw()
         # get current joints just to set size
         goal = numpy.copy(self.arm.get_current_joint_position())
         # go to zero position, except for insert joint so we can't break tool in cannula
@@ -42,8 +47,19 @@ class example_application:
         goal[2] = 0.12
         self.arm.move_joint(goal, interpolate=True)
 
-    def addMarker(self, position, id):
+    def vmove(self, goal, speed, frame=PyKDL.Frame(), iterations=50):
+        current_position = self.arm.get_current_position().p
+        robot_goal = frame * goal
+        distance =  robot_goal - current_position
+        sleep_time = (distance/(speed*iterations)).Norm()
 
+        #intermediate points
+        interp_points = [np.linspace(s,e,iterations) for s,e in zip (current_position, robot_goal)]
+        for x,y,z in zip(*interp_points):
+            self.arm.move(PyKDL.Vector(x,y,z), blocking=False)
+            rospy.sleep(sleep_time)
+
+    def addMarker(self, position, id):
         marker = Marker()
         marker.header.frame_id = "PSM1_psm_base_link"
         marker.header.stamp = rospy.Time.now()
@@ -54,9 +70,9 @@ class example_application:
         marker.scale.y = 0.005
         marker.scale.z = 0.005
         marker.color.a = 1.0
-        marker.color.r = 0.0
-        marker.color.g = 0.5
-        marker.color.b = 0.5
+        marker.color.r = 0.1
+        marker.color.g = 0.9
+        marker.color.b = 0.9
         marker.pose.position.x = position[0]
         marker.pose.position.y = position[1]
         marker.pose.position.z = position[2]
@@ -97,18 +113,17 @@ class example_application:
         for idx, point in enumerate(points):
             point = self.convert_units(point)
             # Add slight z offset
-            point[2] -= 0.15
+            point[2] -= 0.1
             self.addMarker(point, idx)
             print('Moving to: ' + str(point))
-            self.arm.move(PyKDL.Vector(point[0], point[1], point[2]))
+            self.vmove(PyKDL.Vector(point[0], point[1], point[2]),0.15)
             #####
-            for letter in 'e':
+            for letter in 'a':
 
                 #Pause at point
                 rospy.sleep(1)
 
-                # Get Message from Aurora
-                print('Getting Aurora message')
+                # Get Message from Aurora print('Getting Aurora message')
                 aurora_message = rospy.wait_for_message(topic, PoseStamped)
                 # Bag file
                 bag.write(topic, aurora_message)
@@ -154,3 +169,4 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         pass
+
