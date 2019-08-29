@@ -1,4 +1,5 @@
-#!/user/bin/env python\
+#!/usr/bin/env python
+
 import rospy
 import rosbag
 from geometry_msgs.msg import PoseStamped
